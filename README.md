@@ -8,7 +8,7 @@ Please note, there are **both documented and undocumented vulnerabilities** with
 
 ## WARNING!
 
-Damn Vulnerable Web Application is damn vulnerable! **Do not upload it to your hosting provider's public html folder or any Internet facing servers**, as they will be compromised. It is recommended using a virtual machine (such as [VirtualBox](https://www.virtualbox.org/) or [VMware](https://www.vmware.com/)), which is set to NAT networking mode. Inside a guest machine, you can download and install [XAMPP](https://www.apachefriends.org/) for the web server and database.
+Damn Vulnerable Web Application is damn vulnerable! **Do not upload it to your hosting provider's public html folder or any Internet facing servers**, as they will be compromised. It is recommended using a virtual machine (such as [VirtualBox](https://www.virtualbox.org/) or [VMware](https://www.vmware.com/)), which is set to NAT networking mode. Inside a guest machine, you can download and install [XAMPP](https://www.apachefriends.org/en/xampp.html) for the web server and database.
 
 ### Disclaimer
 
@@ -38,18 +38,10 @@ along with Damn Vulnerable Web Application (DVWA).  If not, see <https://www.gnu
 ## Internationalisation
 
 This file is available in multiple languages:
-- Arabic: [العربية](README.ar.md)
-- Chinese: [简体中文](README.zh.md)
-- French: [Français](README.fr.md)
-- Korean: [한국어](README.ko.md)
-- Persian: [فارسی](README.fa.md)
-- Portuguese: [Português](README.pt.md)
-- Spanish: [Español](README.es.md)
-- Turkish: [Türkçe](README.tr.md)
-- Indonesia: [Indonesia](README.id.md)
-- Vietnamese: [Vietnamese](README.vi.md)
 
-If you would like to contribute a translation, please submit a PR. Note though, this does not mean just run it through Google Translate and send that in, those will be rejected. Submit your translated version by adding a new 'README.xx.md' file where xx is the two-letter code of your desired language (based on [ISO 639-1](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes)).
+- Chinese: [简体中文](README.zh.md)
+
+If you would like to contribute a translation, please submit a PR. Note though, this does not mean just run it through Google Translate and send that in, those will be rejected.
 
 - - -
 
@@ -67,160 +59,30 @@ Or [download a ZIP of the files](https://github.com/digininja/DVWA/archive/maste
 
 ## Installation
 
-### Automated Installation 🛠️
-
-**Note, this is not an official DVWA script, it was written by [IamCarron](https://github.com/iamCarron/). A lot of work went into creating the script and, when it was created, it did not do anything malicious, however it is recommended you review the script before blindly running it on your system, just in case. Please report any bugs to [IamCarron](https://github.com/iamCarron/), not here.**
-
-An automated configuration script for DVWA on Debian-based machines, including Kali, Ubuntu, Kubuntu, Linux Mint, Zorin OS...
-
-**Note: This script requires root privileges and is tailored for Debian-based systems. Ensure you are running it as the root user.**
-
-#### Installation Requirements
-
-- **Operating System:** Debian-based system (Kali, Ubuntu, Kubuntu, Linux Mint, Zorin OS)
-- **Privileges:** Execute as root user
-
-#### Installation Steps
-
-##### One-Liner
-
-This will download an install script written by [@IamCarron](https://github.com/IamCarron) and run it automatically. This would not be included here if we did not trust the author and the script as it was when we reviewed it, but there is always the chance of someone going rogue, and so if you don't feel safe running someone else's code without reviewing it yourself, follow the manual process and you can review it once downloaded.
-
-```bash
-sudo bash -c "$(curl --fail --show-error --silent --location https://raw.githubusercontent.com/IamCarron/DVWA-Script/main/Install-DVWA.sh)"
-```
-
-##### Manually Running the Script
-1. **Download the script:**
-   ```bash
-   wget https://raw.githubusercontent.com/IamCarron/DVWA-Script/main/Install-DVWA.sh
-   ```
-
-2. **Make the script executable:**
-   ```bash
-   chmod +x Install-DVWA.sh
-   ```
-
-3. **Run the script as root:**
-   ```bash
-   sudo ./Install-DVWA.sh
-   ```
+**Please make sure your config/config.inc.php file exists. Only having a config.inc.php.dist will not be sufficient and you'll have to edit it to suit your environment and rename it to config.inc.php. [Windows may hide the trailing extension.](https://www.howtogeek.com/205086/beginner-how-to-make-windows-show-file-extensions/)**
 
 ### Installation Videos
 
-- [Installing DVWA on Kali running in VirtualBox](https://www.youtube.com/watch?v=WkyDxNJkgQ4)
-- [Installing DVWA on Windows using XAMPP](https://youtu.be/Yzksa_WjnY0)
-- [Installing Damn Vulnerable Web Application (DVWA) on Windows 10](https://www.youtube.com/watch?v=cak2lQvBRAo)
+- [Installing Damn Vulnerable Web Application (DVWA) on Windows 10](https://www.youtube.com/watch?v=cak2lQvBRAo) [12:39 minutes]
 
 ### Windows + XAMPP
 
-The easiest way to install DVWA is to download and install [XAMPP](https://www.apachefriends.org/) if you do not already have a web server setup.
+The easiest way to install DVWA is to download and install [XAMPP](https://www.apachefriends.org/en/xampp.html) if you do not already have a web server setup.
 
 XAMPP is a very easy to install Apache Distribution for Linux, Solaris, Windows and Mac OS X. The package includes the Apache web server, MySQL, PHP, Perl, a FTP server and phpMyAdmin.
 
-This [video](https://youtu.be/Yzksa_WjnY0) walks you through the installation process for Windows but it should be similar for other OSs.
+XAMPP can be downloaded from:
+<https://www.apachefriends.org/en/xampp.html>
 
-### Docker
-
-Thanks to [hoang-himself](https://github.com/hoang-himself) and [JGillam](https://github.com/JGillam), every commit to the `master` branch causes a Docker image to be built and ready to be pulled down from GitHub Container Registry.
-
-For more information on what you are getting, you can browse [the prebuilt Docker images](https://github.com/digininja/DVWA/pkgs/container/dvwa).
-
-#### Getting Started
-
-Prerequisites: Docker and Docker Compose.
-
-- If you are using Docker Desktop, both of these should be already installed.
-- If you prefer Docker Engine on Linux, make sure to follow their [installation guide](https://docs.docker.com/engine/install/#server).
-
-**We provide support for the latest Docker release as shown above.**
-If you are using Linux and the Docker package that came with your package manager, it will probably work too, but support will only be best-effort.
-
-Upgrading Docker from the package manager version to upstream requires that you uninstall the old versions as seen in their manuals for [Ubuntu](https://docs.docker.com/engine/install/ubuntu/#uninstall-old-versions), [Fedora](https://docs.docker.com/engine/install/fedora/#uninstall-old-versions) and others.
-Your Docker data (containers, images, volumes, etc.) should not be affected, but in case you do run into a problem, make sure to [tell Docker](https://www.docker.com/support) and use search engines in the mean time.
-
-Then, to get started:
-
-1. Run `docker version` and `docker compose version` to see if you have Docker and Docker Compose properly installed. You should be able to see their versions in the output.
-
-    For example:
-
-    ```text
-    >>> docker version
-    Client:
-     [...]
-     Version:           23.0.5
-     [...]
-
-    Server: Docker Desktop 4.19.0 (106363)
-     Engine:
-      [...]
-      Version:          23.0.5
-      [...]
-
-    >>> docker compose version
-    Docker Compose version v2.17.3
-    ```
-
-    If you don't see anything or get a command not found error, follow the prerequisites to setup Docker and Docker Compose.
-
-2. Clone or download this repository and extract (see [Download](#download)).
-3. Open a terminal of your choice and change its working directory into this folder (`DVWA`).
-4. Run `docker compose up -d`.
-
-DVWA is now available at `http://localhost:4280`.
-
-**Notice that for running DVWA in containers, the web server is listening on port 4280 instead of the usual port of 80.**
-For more information on this decision, see [I want to run DVWA on a different port](#i-want-to-run-dvwa-on-a-different-port).
-
-#### Local Build
-
-If you made local changes and want to build the project from local, go to `compose.yml` and change `pull_policy: always` to `pull_policy: build`.
-
-Running `docker compose up -d` should trigger Docker to build an image from local regardless of what is available in the registry.
-
-See also: [`pull_policy`](https://github.com/compose-spec/compose-spec/blob/master/05-services.md#pull_policy
-).
-
-### PHP Versions
-
-Ideally you should be using the latest stable version of PHP as that is the version that this app will be developed and tested on.
-
-Support will not be given for anyone trying to use PHP 5.x.
-
-Versions less than 7.3 have known issues that will cause problems, most of the app will work, but random things may not. Unless you have a very good reason for using such an old version, support will not be given.
+Simply unzip dvwa.zip, place the unzipped files in your public html folder, then point your browser to: `http://127.0.0.1/dvwa/setup.php`
 
 ### Linux Packages
 
 If you are using a Debian based Linux distribution, you will need to install the following packages _(or their equivalent)_:
 
-- apache2
-- libapache2-mod-php
-- mariadb-server
-- mariadb-client
-- php php-mysqli
-- php-gd
-
-I would recommend doing an update before this, just so you make sure you are going to get the latest version of everything.
-
-```
-apt update
-apt install -y apache2 mariadb-server mariadb-client php php-mysqli php-gd libapache2-mod-php
-```
+`apt-get -y install apache2 mariadb-server php php-mysqli php-gd libapache2-mod-php`
 
 The site will work with MySQL instead of MariaDB but we strongly recommend MariaDB as it works out of the box whereas you have to make changes to get MySQL to work correctly.
-
-## Configurations
-
-### Config File
-
-DVWA ships with a dummy copy of its config file which you will need to copy into place and then make the appropriate changes. On Linux, assuming you are in the DVWA directory, this can be done as follows:
-
-`cp config/config.inc.php.dist config/config.inc.php`
-
-On Windows, this can be a bit harder if you are hiding file extensions, if you are unsure about this, this blog post explains more about it:
-
-[How to Make Windows Show File Extensions](https://www.howtogeek.com/205086/beginner-how-to-make-windows-show-file-extensions/)
 
 ### Database Setup
 
@@ -240,64 +102,40 @@ $_DVWA[ 'db_database' ] = 'dvwa';
 
 Note, if you are using MariaDB rather than MySQL (MariaDB is default in Kali), then you can't use the database root user, you must create a new database user. To do this, connect to the database as the root user then use the following commands:
 
-```mariadb
-MariaDB [(none)]> create database dvwa;
+```mysql
+mysql> create database dvwa;
 Query OK, 1 row affected (0.00 sec)
 
-MariaDB [(none)]> create user dvwa@localhost identified by 'p@ssw0rd';
+mysql> create user dvwa@localhost identified by 'p@ssw0rd';
 Query OK, 0 rows affected (0.01 sec)
 
-MariaDB [(none)]> grant all on dvwa.* to dvwa@localhost;
+mysql> grant all on dvwa.* to dvwa@localhost;
 Query OK, 0 rows affected (0.01 sec)
 
-MariaDB [(none)]> flush privileges;
+mysql> flush privileges;
 Query OK, 0 rows affected (0.00 sec)
 ```
 
-### Disable Authentication
+### Other Configuration
 
-Some tools don't work well with authentication so can't be used with DVWA. To get around this, there is a config option to disable authentication checking. To do this, simply set the following in the config file:
+Depending on your Operating System, as well as version of PHP, you may wish to alter the default configuration. The location of the files will be different on a per-machine basis.
 
-```php
-$_DVWA[ 'disable_authentication' ] = true;
-```
-
-You will also need to set the security level to one that is appropriate to the testing you want to do:
-
-```php
-$_DVWA[ 'default_security_level' ] = 'low';
-```
-
-In this state, you can access all the features without needing to log in and set any cookies.
-
-### Folder Permissions
+**Folder Permissions**:
 
 * `./hackable/uploads/` - Needs to be writeable by the web service (for File Upload).
+* `./external/phpids/0.6/lib/IDS/tmp/phpids_log.txt` - Needs to be writable by the web service (if you wish to use PHPIDS).
 
-### PHP configuration
+**PHP configuration**:
 
-On Linux systems, likely found in `/etc/php/x.x/fpm/php.ini` or `/etc/php/x.x/apache2/php.ini`.
+* `allow_url_include = on` - Allows for Remote File Inclusions (RFI)   [[allow_url_include](https://secure.php.net/manual/en/filesystem.configuration.php#ini.allow-url-include)]
+* `allow_url_fopen = on` -  Allows for Remote File Inclusions (RFI)    [[allow_url_fopen](https://secure.php.net/manual/en/filesystem.configuration.php#ini.allow-url-fopen)]
+* `safe_mode = off` - (If PHP <= v5.4) Allows for SQL Injection (SQLi) [[safe_mode](https://secure.php.net/manual/en/features.safe-mode.php)]
+* `magic_quotes_gpc = off` - (If PHP <= v5.4) Allows for SQL Injection (SQLi) [[magic_quotes_gpc](https://secure.php.net/manual/en/security.magicquotes.php)]
+* `display_errors = off` - (Optional) Hides PHP warning messages to make it less verbose [[display_errors](https://secure.php.net/manual/en/errorfunc.configuration.php#ini.display-errors)]
 
-* To allow  Remote File Inclusions (RFI):
-    * `allow_url_include = on` [[allow_url_include](https://secure.php.net/manual/en/filesystem.configuration.php#ini.allow-url-include)]
-    * `allow_url_fopen = on` [[allow_url_fopen](https://secure.php.net/manual/en/filesystem.configuration.php#ini.allow-url-fopen)]
+**File: `config/config.inc.php`**:
 
-* To make sure PHP shows all error messages:
-    * `display_errors = on` [[display_errors](https://secure.php.net/manual/en/errorfunc.configuration.php#ini.display-errors)]
-    * `display_startup_errors = on` [[display_startup_errors](https://secure.php.net/manual/en/errorfunc.configuration.php#ini.display-startup-errors)]
-
-Make sure you restart the php service or Apache after making the changes.
-
-### reCAPTCHA
-
-This is only required for the "Insecure CAPTCHA" lab, if you aren't playing with that lab, you can ignore this section.
-
-Generated a pair of API keys from <https://www.google.com/recaptcha/admin/create>.
-
-These then go in the following sections of `./config/config.inc.php`:
-
-* `$_DVWA[ 'recaptcha_public_key' ]`
-* `$_DVWA[ 'recaptcha_private_key' ]`
+* `$_DVWA[ 'recaptcha_public_key' ]` & `$_DVWA[ 'recaptcha_private_key' ]` - These values need to be generated from: https://www.google.com/recaptcha/admin/create
 
 ### Default Credentials
 
@@ -313,101 +151,18 @@ _Note: This will be different if you installed DVWA into a different directory._
 
 - - -
 
+## Docker Container
+
+- [dockerhub page](https://hub.docker.com/r/vulnerables/web-dvwa/)
+`docker run --rm -it -p 80:80 vulnerables/web-dvwa`
+
+Please ensure you are using aufs due to previous MySQL issues. Run `docker info` to check your storage driver. If it isn't aufs, please change it as such. There are guides for each operating system on how to do that, but they're quite different so we won't cover that here.
+
+- - -
+
 ## Troubleshooting
 
 These assume you are on a Debian based distro, such as Debian, Ubuntu and Kali. For other distros, follow along, but update the command where appropriate.
-
-### Containers
-
-#### I want to access the logs
-
-If you are using Docker Desktop, logs can be accessed from the graphical application.
-Some minor details may change with newer versions, but the access method should be the same.
-
-![Overview of DVWA compose](./docs/graphics/docker/overview.png)
-![Viewing DVWA logs](docs/graphics/docker/detail.png)
-
-Logs can also be accessed from the terminal.
-
-1. Open a terminal and change its working directory to DVWA
-2. Show the merged logs
-
-    ```shell
-    docker compose logs
-    ```
-
-   In case you want to export the logs to a file, e.g. `dvwa.log`
-
-   ```shell
-   docker compose logs >dvwa.log
-   ```
-
-#### I want to run DVWA on a different port
-
-We don't use port 80 by default for a few reasons:
-
-- Some users might already be running something on port 80.
-- Some users might be using a rootless container engine (like Podman), and 80 is a privileged port (< 1024). Additional configuration (e.g. setting `net.ipv4.ip_unprivileged_port_start`) is required, but you will have to research on your own.
-
-You can expose DVWA on a different port by changing the port binding in the `compose.yml` file.
-For example, you can change
-
-```yml
-ports:
-  - 127.0.0.1:4280:80
-```
-
-to
-
-```yml
-ports:
-  - 127.0.0.1:8806:80
-```
-
-DVWA is now accessible at `http://localhost:8806`.
-
-In cases in which you want DVWA to not only be accessible exclusively from your own device, but
-on your local network too (e.g. because you are setting up a test machine for a workshop), you
-can remove the `127.0.0.1:` from the port mapping (or replace it with you LAN IP). This way it
-will listen on all available device. The safe default should always be to only listen on your
-local loopback device. After all, it is a damn vulnerable web application, running on your machine.
-
-#### DVWA auto starts when Docker runs
-
-The included [`compose.yml`](./compose.yml) file automatically runs DVWA and its database when Docker starts.
-
-To disable this, you can delete or comment out the `restart: unless-stopped` lines in the [`compose.yml`](./compose.yml) file.
-
-If you want to disable this behavior temporarily, you can run `docker compose stop`, or use Docker Desktop, find `dvwa` and click Stop.
-Additionally, you can delete the containers, or run `docker compose down`.
-
-### Log files
-
-On Linux systems Apache generates two log files by default, `access.log` and `error.log` and on Debian based system these are usually found in `/var/log/apache2/`.
-
-When submitting error reports, problems, anything like that, please include at least the last five lines from each of these files. On Debian based systems you can get these like this:
-
-```
-tail -n 5 /var/log/apache2/access.log /var/log/apache2/error.log
-```
-
-### I browsed to the site and got a 404
-
-If you are having this problem you need to understand file locations. By default, the Apache document root (the place it starts looking for web content) is `/var/www/html`. If you put the file `hello.txt` in this directory, to access it you would browse to `http://localhost/hello.txt`.
-
-If you created a directory and put the file in there - `/var/www/html/mydir/hello.txt` - you would then need to browse to `http://localhost/mydir/hello.txt`.
-
-Linux is by default case sensitive and so in the example above, if you tried to browse to any of these, you would get a `404 Not Found`:
-
-- `http://localhost/MyDir/hello.txt`
-- `http://localhost/mydir/Hello.txt`
-- `http://localhost/MYDIR/hello.txt`
-
-How does this affect DVWA? Most people use git to checkout DVWA into `/var/www/html`, this gives them the directory `/var/www/html/DVWA/` with all the DVWA files inside it. They then browse to `http://localhost/` and get either a `404` or the default Apache welcome page. As the files are in DVWA, you must browse to `http://localhost/DVWA`.
-
-The other common mistake is to browse to `http://localhost/dvwa` which will give a `404` because `dvwa` is not `DVWA` as far as Linux directory matching is concerned.
-
-So after setup, if you try to visit the site and get a `404`, think about where you installed the files to, where they are relative to the document root, and what the case of the directory you used is.
 
 ### "Access denied" running setup
 
@@ -476,46 +231,6 @@ This is not an authentication issue but tells you that the database server is no
 ```sh
 sudo service mysql start
 ```
-
-### Connection Refused
-
-An error similar to this one:
-
-```
-Fatal error: Uncaught mysqli_sql_exception: Connection refused in /var/sites/dvwa/non-secure/htdocs/dvwa/includes/dvwaPage.inc.php:535
-```
-
-Means your database server is not running or you've got the wrong IP address in the config file.
-
-Check this line in the config file to see where the database server is expected to be:
-
-```
-$_DVWA[ 'db_server' ]   = '127.0.0.1';
-```
-
-Then go to this server and check that it is running. In Linux this can be done with:
-
-```
-systemctl status mariadb.service
-```
-
-And you are looking for something like this, the important bit is that it says `active (running)`.
-
-```
-● mariadb.service - MariaDB 10.5.19 database server
-     Loaded: loaded (/lib/systemd/system/mariadb.service; enabled; preset: enabled)
-     Active: active (running) since Thu 2024-03-14 16:04:25 GMT; 1 week 5 days ago
-```
-
-If it is not running, you can start it with:
-
-```
-sudo systemctl stop mariadb.service 
-```
-
-Note the `sudo` and make sure you put your Linux user password in if requested.
-
-In Windows, check the status in the XAMPP console.
 
 ### Unknown authentication method
 
@@ -587,6 +302,34 @@ For more information, see:
 
 <https://www.ryadel.com/en/fix-mysql-server-gone-away-packets-order-similar-mysql-related-errors/>
 
+### SQL Injection won't work on PHP v5.2.6.
+
+PHP 5.x reached end of life in January 2019 so we would recommend running DVWA with a current 7.x version, if you must use 5.x...
+
+If you are using PHP v5.2.6 or above, you will need to do the following in order for SQL injection and other vulnerabilities to work.
+
+In `.htaccess`:
+
+Replace:
+
+```php
+<IfModule mod_php5.c>
+    php_flag magic_quotes_gpc off
+    #php_flag allow_url_fopen on
+    #php_flag allow_url_include on
+</IfModule>
+```
+
+With:
+
+```php
+<IfModule mod_php5.c>
+    magic_quotes_gpc = Off
+    allow_url_fopen = On
+    allow_url_include = On
+</IfModule>
+```
+
 ### Command Injection won't work
 
 Apache may not have high enough privileges to run commands on the web server. If you are running DVWA under Linux make sure you are logged in as root. Under Windows log in as Administrator.
@@ -599,7 +342,7 @@ You may be running into problems with SELinux.  Either disable SELinux or run th
 setsebool -P httpd_can_network_connect_db 1
 ```
 
-### Anything Else
+### Anything else
 
 For the latest troubleshooting information please read both open and closed tickets in the git repo:
 
@@ -613,14 +356,6 @@ If raising a ticket, please submit at least the following information:
 - The last 5 lines from the web server error log directly after whatever error you are reporting occurs
 - If it is a database authentication problem, go through the steps above and screenshot each step. Submit these along with a screenshot of the section of the config file showing the database user and password.
 - A full description of what is going wrong, what you expect to happen, and what you have tried to do to fix it. "login broken" is no enough for us to understand your problem and to help fix it.
-
-- - -
-
-## Tutorials
-
-I am going to try to put together some tutorial videos that walk through some of the vulnerabilities and show how to detect them and then how to exploit them. Here are the ones I've made so far:
-
-[Finding and Exploiting Reflected XSS](https://youtu.be/V4MATqtdxss)
 
 - - -
 
@@ -645,33 +380,13 @@ The challenges are exactly the same as for MySQL, they just run against SQLite3 
 
 - - -
 
-👨‍💻 Contributors
------
-
-Thanks for all your contributions and keeping this project updated. :heart:
-
-If you have an idea, some kind of improvement or just simply want to collaborate, you are welcome to contribute and participate in the Project, feel free to send your PR.
-
-<p align="center">
-<a href="https://github.com/digininja/DVWA/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=digininja/DVWA&max=500">
-</a>
-</p>
-
-- - -
-
-## Reporting Vulnerabilities
-
-To put it simply, please don't!
-
-Once a year or so, someone will submit a report for a vulnerability they've found in the app, some are well written, sometimes better than I've seen in paid pen test reports, some are just "you are missing headers, pay me".
-
-In 2023, this elevated to a whole new level when someone decided to request a CVE for one of the vulnerabities, they were given [CVE-2023-39848](https://nvd.nist.gov/vuln/detail/CVE-2023-39848). Much hilarity ensued and time was wasted getting this corrected.
-
-The app has vulnerabilities, it is deliberate. Most are the well documented ones that you work through as lessons, others are "hidden" ones, ones to find on your own. If you really want to show off your skills at finding the hidden extras, write a blog post or create a video as there are probably people out there who would be interested in learning about them and about how your found them. If you send us the link, we may even include it in the references.
-
 ## Links
+
+Homepage: <https://dvwa.co.uk/>
 
 Project Home: <https://github.com/digininja/DVWA>
 
 *Created by the DVWA team*
+
+
+## Test SonarQube Scan Result in MR

@@ -5,12 +5,15 @@ if( !defined( 'DVWA_WEB_PAGE_TO_ROOT' ) ) {
 	exit;
 }
 
+session_start(); // Creates a 'Full Path Disclosure' vuln.
+
 if (!file_exists(DVWA_WEB_PAGE_TO_ROOT . 'config/config.inc.php')) {
 	die ("DVWA System error - config file not found. Copy config/config.inc.php.dist to config/config.inc.php and configure to your environment.");
 }
 
 // Include configs
 require_once DVWA_WEB_PAGE_TO_ROOT . 'config/config.inc.php';
+require_once( 'dvwaPhpIds.inc.php' );
 
 // Declare the $html variable
 if( !isset( $html ) ) {
@@ -23,94 +26,15 @@ if( !isset( $_COOKIE[ 'security' ] ) || !in_array( $_COOKIE[ 'security' ], $secu
 	// Set security cookie to impossible if no cookie exists
 	if( in_array( $_DVWA[ 'default_security_level' ], $security_levels) ) {
 		dvwaSecurityLevelSet( $_DVWA[ 'default_security_level' ] );
-	} else {
+	}
+	else {
 		dvwaSecurityLevelSet( 'impossible' );
 	}
-	// If the cookie wasn't set then the session flags need updating.
-	dvwa_start_session();
-}
 
-/*
- * This function is called after login and when you change the security level.
- * It gets the security level and sets the httponly and samesite cookie flags
- * appropriately.
- *
- * To force an update of the cookie flags we need to update the session id,
- * just setting the flags and doing a session_start() does not change anything.
- * For this, session_id() or session_regenerate_id() can be used.
- * Both keep the existing session values, so nothing is lost,
- * it will just cause a new Set-Cookie header to be sent with the new right
- * flags and the new id (or the same one if we wish to keep it).
-*/
-function dvwa_start_session() {
-	// This will setup the session cookie based on
-	// the security level.
-
-	$security_level = dvwaSecurityLevelGet();
-	if ($security_level == 'impossible') {
-		$httponly = true;
-		$samesite = "Strict";
-	}
-	else {
-		$httponly = false;
-		$samesite = "";
-	}
-
-	$maxlifetime = 86400;
-	$secure = false;
-	$domain = parse_url($_SERVER['HTTP_HOST'], PHP_URL_HOST);
-
-	/*
-	 * Need to do this as you can't update the settings of a session
-	 * while it is open. So check if one is open, close it if needed
-	 * then update the values and start it again.
-	*/
-	if (session_status() == PHP_SESSION_ACTIVE) {
-		session_write_close();
-	}
-
-	session_set_cookie_params([
-		'lifetime' => $maxlifetime,
-		'path' => '/',
-		'domain' => $domain,
-		'secure' => $secure,
-		'httponly' => $httponly,
-		'samesite' => $samesite
-	]);
-
-	/*
-	 * We need to force a new Set-Cookie header with the updated flags by updating
-	 * the session id, either regenerating it or setting it to a value, because
-	 * session_start() might not generate a Set-Cookie header if a cookie already
-	 * exists.
-	 *
-	 * For impossible security level, we regenerate the session id, PHP will
-	 * generate a new random id. This is good security practice because it
-	 * prevents the reuse of a previous unauthenticated id that an attacker
-	 * might have knowledge of (aka session fixation attack).
-   *
-	 * For lower levels, we want to allow session fixation attacks, so if an id
-	 * already exists, we don't want it to change after authentication. We thus
-	 * set the id to its previous value using session_id(), which will force
-	 * the Set-Cookie header.
-	*/
-	if ($security_level == 'impossible') {
-		session_start();
-		session_regenerate_id(); // force a new id to be generated
-	}
-	else {
-		if (isset($_COOKIE[session_name()])) // if a session id already exists
-			session_id($_COOKIE[session_name()]); // we keep the same id
-		session_start(); // otherwise a new one will be generated here
-	}
-}
-
-if (array_key_exists ("Login", $_POST) && $_POST['Login'] == "Login") {
-	dvwa_start_session();
-} else {
-	if (!session_id()) {
-		session_start();
-	}
+	if( $_DVWA[ 'default_phpids_level' ] == 'enabled' )
+		dvwaPhpIdsEnabledSet( true );
+	else
+		dvwaPhpIdsEnabledSet( false );
 }
 
 if (!array_key_exists ("default_locale", $_DVWA)) {
@@ -118,6 +42,17 @@ if (!array_key_exists ("default_locale", $_DVWA)) {
 }
 
 dvwaLocaleSet( $_DVWA[ 'default_locale' ] );
+
+// DVWA version
+function dvwaVersionGet() {
+	return '1.10 *Development*';
+}
+
+// DVWA release date
+function dvwaReleaseDateGet() {
+	return '2015-10-08';
+}
+
 
 // Start session functions --
 
@@ -130,12 +65,36 @@ function &dvwaSessionGrab() {
 
 
 function dvwaPageStartup( $pActions ) {
-	if (in_array('authenticated', $pActions)) {
+	if( in_array( 'authenticated', $pActions ) ) {
 		if( !dvwaIsLoggedIn()) {
 			dvwaRedirect( DVWA_WEB_PAGE_TO_ROOT . 'login.php' );
 		}
 	}
+
+	if( in_array( 'phpids', $pActions ) ) {
+		if( dvwaPhpIdsIsEnabled() ) {
+			dvwaPhpIdsTrap();
+		}
+	}
 }
+
+
+function dvwaPhpIdsEnabledSet( $pEnabled ) {
+	$dvwaSession =& dvwaSessionGrab();
+	if( $pEnabled ) {
+		$dvwaSession[ 'php_ids' ] = 'enabled';
+	}
+	else {
+		unset( $dvwaSession[ 'php_ids' ] );
+	}
+}
+
+
+function dvwaPhpIdsIsEnabled() {
+	$dvwaSession =& dvwaSessionGrab();
+	return isset( $dvwaSession[ 'php_ids' ] );
+}
+
 
 function dvwaLogin( $pUsername ) {
 	$dvwaSession =& dvwaSessionGrab();
@@ -144,11 +103,6 @@ function dvwaLogin( $pUsername ) {
 
 
 function dvwaIsLoggedIn() {
-	global $_DVWA;
-
-	if (in_array("disable_authentication", $_DVWA) && $_DVWA['disable_authentication']) {
-		return true;
-	}
 	$dvwaSession =& dvwaSessionGrab();
 	return isset( $dvwaSession[ 'username' ] );
 }
@@ -161,24 +115,19 @@ function dvwaLogout() {
 
 
 function dvwaPageReload() {
-	if  ( array_key_exists( 'HTTP_X_FORWARDED_PREFIX' , $_SERVER )) {
-		dvwaRedirect( $_SERVER[ 'HTTP_X_FORWARDED_PREFIX' ] . $_SERVER[ 'PHP_SELF' ] );
-	}
-	else {
-		dvwaRedirect( $_SERVER[ 'PHP_SELF' ] );
-	}
+	dvwaRedirect( $_SERVER[ 'PHP_SELF' ] );
 }
 
 function dvwaCurrentUser() {
 	$dvwaSession =& dvwaSessionGrab();
-	return ( isset( $dvwaSession[ 'username' ]) ? $dvwaSession[ 'username' ] : 'Unknown') ;
+	return ( isset( $dvwaSession[ 'username' ]) ? $dvwaSession[ 'username' ] : '') ;
 }
 
 // -- END (Session functions)
 
 function &dvwaPageNewGrab() {
 	$returnArray = array(
-		'title'           => 'Damn Vulnerable Web Application (DVWA)',
+		'title'           => 'Damn Vulnerable Web Application (DVWA) v' . dvwaVersionGet() . '',
 		'title_separator' => ' :: ',
 		'body'            => '',
 		'page_id'         => '',
@@ -190,21 +139,7 @@ function &dvwaPageNewGrab() {
 
 
 function dvwaSecurityLevelGet() {
-	global $_DVWA;
-
-	// If there is a security cookie, that takes priority.
-	if (isset($_COOKIE['security'])) {
-		return $_COOKIE[ 'security' ];
-	}
-
-	// If not, check to see if authentication is disabled, if it is, use
-	// the default security level.
-	if (in_array("disable_authentication", $_DVWA) && $_DVWA['disable_authentication']) {
-		return $_DVWA[ 'default_security_level' ];
-	}
-
-	// Worse case, set the level to impossible.
-	return 'impossible';
+	return isset( $_COOKIE[ 'security' ] ) ? $_COOKIE[ 'security' ] : 'impossible';
 }
 
 
@@ -215,12 +150,11 @@ function dvwaSecurityLevelSet( $pSecurityLevel ) {
 	else {
 		$httponly = false;
 	}
-
-	setcookie( 'security', $pSecurityLevel, 0, "/", "", false, $httponly );
-	$_COOKIE['security'] = $pSecurityLevel;
+	setcookie( session_name(), session_id(), null, '/', null, null, $httponly );
+	setcookie( 'security', $pSecurityLevel, NULL, NULL, NULL, NULL, $httponly );
 }
 
-function dvwaLocaleGet() {
+function dvwaLocaleGet() {	
 	$dvwaSession =& dvwaSessionGrab();
 	return $dvwaSession[ 'locale' ];
 }
@@ -301,11 +235,6 @@ function dvwaHtmlEcho( $pPage ) {
 		$menuBlocks[ 'vulnerabilities' ][] = array( 'id' => 'xss_s', 'name' => 'XSS (Stored)', 'url' => 'vulnerabilities/xss_s/' );
 		$menuBlocks[ 'vulnerabilities' ][] = array( 'id' => 'csp', 'name' => 'CSP Bypass', 'url' => 'vulnerabilities/csp/' );
 		$menuBlocks[ 'vulnerabilities' ][] = array( 'id' => 'javascript', 'name' => 'JavaScript', 'url' => 'vulnerabilities/javascript/' );
-		if (dvwaCurrentUser() == "admin") {
-			$menuBlocks[ 'vulnerabilities' ][] = array( 'id' => 'authbypass', 'name' => 'Authorisation Bypass', 'url' => 'vulnerabilities/authbypass/' );
-		}
-		$menuBlocks[ 'vulnerabilities' ][] = array( 'id' => 'open_redirect', 'name' => 'Open HTTP Redirect', 'url' => 'vulnerabilities/open_redirect/' );
-		$menuBlocks[ 'vulnerabilities' ][] = array( 'id' => 'encryption', 'name' => 'Cryptography', 'url' => 'vulnerabilities/cryptography/' );
 	}
 
 	$menuBlocks[ 'meta' ] = array();
@@ -350,11 +279,12 @@ function dvwaHtmlEcho( $pPage ) {
 	}
 	// -- END (security cookie)
 
+	$phpIdsHtml   = '<em>PHPIDS:</em> ' . ( dvwaPhpIdsIsEnabled() ? 'enabled' : 'disabled' );
 	$userInfoHtml = '<em>Username:</em> ' . ( dvwaCurrentUser() );
 	$securityLevelHtml = "<em>Security Level:</em> {$securityLevelHtml}";
 	$localeHtml = '<em>Locale:</em> ' . ( dvwaLocaleGet() );
 	$sqliDbHtml = '<em>SQLi DB:</em> ' . ( dvwaSQLiDBGet() );
-
+	
 
 	$messagesHtml = messagesPopAllToHtml();
 	if( $messagesHtml ) {
@@ -362,8 +292,8 @@ function dvwaHtmlEcho( $pPage ) {
 	}
 
 	$systemInfoHtml = "";
-	if( dvwaIsLoggedIn() )
-		$systemInfoHtml = "<div align=\"left\">{$userInfoHtml}<br />{$securityLevelHtml}<br />{$localeHtml}<br />{$sqliDbHtml}</div>";
+	if( dvwaIsLoggedIn() ) 
+		$systemInfoHtml = "<div align=\"left\">{$userInfoHtml}<br />{$securityLevelHtml}<br />{$localeHtml}<br />{$phpIdsHtml}<br />{$sqliDbHtml}</div>";
 	if( $pPage[ 'source_button' ] ) {
 		$systemInfoHtml = dvwaButtonSourceHtmlGet( $pPage[ 'source_button' ] ) . " $systemInfoHtml";
 	}
@@ -427,8 +357,8 @@ function dvwaHtmlEcho( $pPage ) {
 
 			<div id=\"footer\">
 
-				<p>Damn Vulnerable Web Application (DVWA)</p>
-				<script src='" . DVWA_WEB_PAGE_TO_ROOT . "dvwa/js/add_event_listeners.js'></script>
+				<p>Damn Vulnerable Web Application (DVWA) v" . dvwaVersionGet() . "</p>
+				<script src='" . DVWA_WEB_PAGE_TO_ROOT . "/dvwa/js/add_event_listeners.js'></script>
 
 			</div>
 
@@ -513,7 +443,7 @@ function dvwaSourceHtmlEcho( $pPage ) {
 
 // To be used on all external links --
 function dvwaExternalLinkUrlGet( $pLink,$text=null ) {
-	if(is_null( $text ) || $text == "") {
+	if(is_null( $text )) {
 		return '<a href="' . $pLink . '" target="_blank">' . $pLink . '</a>';
 	}
 	else {
@@ -539,13 +469,23 @@ function dvwaButtonSourceHtmlGet( $pId ) {
 
 if( $DBMS == 'MySQL' ) {
 	$DBMS = htmlspecialchars(strip_tags( $DBMS ));
+	$DBMS_errorFunc = 'mysqli_error()';
 }
 elseif( $DBMS == 'PGSQL' ) {
 	$DBMS = htmlspecialchars(strip_tags( $DBMS ));
+	$DBMS_errorFunc = 'pg_last_error()';
 }
 else {
 	$DBMS = "No DBMS selected.";
+	$DBMS_errorFunc = '';
 }
+
+//$DBMS_connError = '
+//	<div align="center">
+//		<img src="' . DVWA_WEB_PAGE_TO_ROOT . 'dvwa/images/logo.png" />
+//		<pre>Unable to connect to the database.<br />' . $DBMS_errorFunc . '<br /><br /></pre>
+//		Click <a href="' . DVWA_WEB_PAGE_TO_ROOT . 'setup.php">here</a> to setup the database.
+//	</div>';
 
 function dvwaDatabaseConnect() {
 	global $_DVWA;
@@ -559,7 +499,7 @@ function dvwaDatabaseConnect() {
 		|| !@((bool)mysqli_query($GLOBALS["___mysqli_ston"], "USE " . $_DVWA[ 'db_database' ])) ) {
 			//die( $DBMS_connError );
 			dvwaLogout();
-			dvwaMessagePush( 'Unable to connect to the database.<br />' . mysqli_error($GLOBALS["___mysqli_ston"]));
+			dvwaMessagePush( 'Unable to connect to the database.<br />' . $DBMS_errorFunc );
 			dvwaRedirect( DVWA_WEB_PAGE_TO_ROOT . 'setup.php' );
 		}
 		// MySQL PDO Prepared Statements (for impossible levels)
@@ -620,12 +560,6 @@ function dvwaGuestbook() {
 
 // Token functions --
 function checkToken( $user_token, $session_token, $returnURL ) {  # Validate the given (CSRF) token
-	global $_DVWA;
-
-	if (in_array("disable_authentication", $_DVWA) && $_DVWA['disable_authentication']) {
-		return true;
-	}
-
 	if( $user_token !== $session_token || !isset( $session_token ) ) {
 		dvwaMessagePush( 'CSRF token is incorrect' );
 		dvwaRedirect( $returnURL );
@@ -651,12 +585,13 @@ function tokenField() {  # Return a field for the (CSRF) token
 
 // Setup Functions --
 $PHPUploadPath    = realpath( getcwd() . DIRECTORY_SEPARATOR . DVWA_WEB_PAGE_TO_ROOT . "hackable" . DIRECTORY_SEPARATOR . "uploads" ) . DIRECTORY_SEPARATOR;
+$PHPIDSPath       = realpath( getcwd() . DIRECTORY_SEPARATOR . DVWA_WEB_PAGE_TO_ROOT . "external" . DIRECTORY_SEPARATOR . "phpids" . DIRECTORY_SEPARATOR . dvwaPhpIdsVersionGet() . DIRECTORY_SEPARATOR . "lib" . DIRECTORY_SEPARATOR . "IDS" . DIRECTORY_SEPARATOR . "tmp" . DIRECTORY_SEPARATOR . "phpids_log.txt" );
 $PHPCONFIGPath       = realpath( getcwd() . DIRECTORY_SEPARATOR . DVWA_WEB_PAGE_TO_ROOT . "config");
 
 
-$phpDisplayErrors = 'PHP function display_errors: <span class="' . ( ini_get( 'display_errors' ) ? 'success">Enabled' : 'failure">Disabled' ) . '</span>';                                                  // Verbose error messages (e.g. full path disclosure)
-$phpDisplayStartupErrors = 'PHP function display_startup_errors: <span class="' . ( ini_get( 'display_startup_errors' ) ? 'success">Enabled' : 'failure">Disabled' ) . '</span>';                                                  // Verbose error messages (e.g. full path disclosure)
-$phpDisplayErrors = 'PHP function display_errors: <span class="' . ( ini_get( 'display_errors' ) ? 'success">Enabled' : 'failure">Disabled' ) . '</span>';                                                  // Verbose error messages (e.g. full path disclosure)
+$phpDisplayErrors = 'PHP function display_errors: <em>' . ( ini_get( 'display_errors' ) ? 'Enabled</em> <i>(Easy Mode!)</i>' : 'Disabled</em>' );                                                  // Verbose error messages (e.g. full path disclosure)
+$phpSafeMode      = 'PHP function safe_mode: <span class="' . ( ini_get( 'safe_mode' ) ? 'failure">Enabled' : 'success">Disabled' ) . '</span>';                                                   // DEPRECATED as of PHP 5.3.0 and REMOVED as of PHP 5.4.0
+$phpMagicQuotes   = 'PHP function magic_quotes_gpc: <span class="' . ( ini_get( 'magic_quotes_gpc' ) ? 'failure">Enabled' : 'success">Disabled' ) . '</span>';                                     // DEPRECATED as of PHP 5.3.0 and REMOVED as of PHP 5.4.0
 $phpURLInclude    = 'PHP function allow_url_include: <span class="' . ( ini_get( 'allow_url_include' ) ? 'success">Enabled' : 'failure">Disabled' ) . '</span>';                                   // RFI
 $phpURLFopen      = 'PHP function allow_url_fopen: <span class="' . ( ini_get( 'allow_url_fopen' ) ? 'success">Enabled' : 'failure">Disabled' ) . '</span>';                                       // RFI
 $phpGD            = 'PHP module gd: <span class="' . ( ( extension_loaded( 'gd' ) && function_exists( 'gd_info' ) ) ? 'success">Installed' : 'failure">Missing - Only an issue if you want to play with captchas' ) . '</span>';                    // File Upload
@@ -664,8 +599,9 @@ $phpMySQL         = 'PHP module mysql: <span class="' . ( ( extension_loaded( 'm
 $phpPDO           = 'PHP module pdo_mysql: <span class="' . ( extension_loaded( 'pdo_mysql' ) ? 'success">Installed' : 'failure">Missing' ) . '</span>';                // SQLi
 $DVWARecaptcha    = 'reCAPTCHA key: <span class="' . ( ( isset( $_DVWA[ 'recaptcha_public_key' ] ) && $_DVWA[ 'recaptcha_public_key' ] != '' ) ? 'success">' . $_DVWA[ 'recaptcha_public_key' ] : 'failure">Missing' ) . '</span>';
 
-$DVWAUploadsWrite = 'Writable folder ' . $PHPUploadPath . ': <span class="' . ( is_writable( $PHPUploadPath ) ? 'success">Yes' : 'failure">No' ) . '</span>';                                     // File Upload
-$bakWritable = 'Writable folder ' . $PHPCONFIGPath . ': <span class="' . ( is_writable( $PHPCONFIGPath ) ? 'success">Yes' : 'failure">No' ) . '</span>';   // config.php.bak check                                  // File Upload
+$DVWAUploadsWrite = '[User: ' . get_current_user() . '] Writable folder ' . $PHPUploadPath . ': <span class="' . ( is_writable( $PHPUploadPath ) ? 'success">Yes' : 'failure">No' ) . '</span>';                                     // File Upload
+$bakWritable = '[User: ' . get_current_user() . '] Writable folder ' . $PHPCONFIGPath . ': <span class="' . ( is_writable( $PHPCONFIGPath ) ? 'success">Yes' : 'failure">No' ) . '</span>';   // config.php.bak check                                  // File Upload
+$DVWAPHPWrite     = '[User: ' . get_current_user() . '] Writable file ' . $PHPIDSPath . ': <span class="' . ( is_writable( $PHPIDSPath ) ? 'success">Yes' : 'failure">No' ) . '</span>';                                              // PHPIDS
 
 $DVWAOS           = 'Operating system: <em>' . ( strtoupper( substr (PHP_OS, 0, 3)) === 'WIN' ? 'Windows' : '*nix' ) . '</em>';
 $SERVER_NAME      = 'Web Server SERVER_NAME: <em>' . $_SERVER[ 'SERVER_NAME' ] . '</em>';                                                                                                          // CSRF
